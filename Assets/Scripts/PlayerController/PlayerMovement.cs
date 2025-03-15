@@ -12,7 +12,15 @@ public class PlayerMovement : MonoBehaviour
    //Variables de la gravetat
    private Vector3 velocity;
    public float gravity = -9.81f;
+   
+   //Ground check
+   public bool isGrounded;
+   public Transform groundCheck;
+   public float groundDistance = 0.4f;
+   public LayerMask groundMask;
 
+   public float jumpHeight = 2f;
+   
    private void Start()
    {
       Cursor.lockState = CursorLockMode.Locked;
@@ -30,5 +38,18 @@ public class PlayerMovement : MonoBehaviour
       //Fórmula de velocitat = acceleració * temps^2
       velocity.y += gravity * Time.deltaTime;
       player.Move(velocity * Time.deltaTime);
+      
+      //Comprovar si esta tocant el terra
+      isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+      if (isGrounded && velocity.y < 0)
+      {
+         velocity.y = -2f;
+      }
+      
+      //print(velocity.y);
+      if (Input.GetButtonDown("Jump") && isGrounded)
+      {
+         velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+      }
    }
 }
