@@ -2,6 +2,7 @@ using System;
 using PlayerController;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 namespace EnemyAI
 {
@@ -14,11 +15,22 @@ namespace EnemyAI
         public float damage = 20f;
         public GameManager gameManager;
         
+        //UI Health
+        public Slider healthBar;
+        
+        //Animació i millora del xoc
+        public bool playerInReach;
+        public float attackDelayTimer;
+        public float howMuchEarlierStartAttackAnimation;
+        public float delayBetweenAttacks;
         void Start()
         {
             gameManager = FindObjectOfType<GameManager>();
             player = GameObject.FindGameObjectWithTag("Player");
             playerManager = player.GetComponent<PlayerManager>();
+
+            healthBar.maxValue = enemyHealth;
+            healthBar.value = enemyHealth;
         }
 
         // Update is called once per frame
@@ -39,17 +51,50 @@ namespace EnemyAI
         {
             if (other.gameObject.CompareTag("Player"))
             {
-                playerManager.Hit(20f);
+                playerInReach = true;
                 Debug.Log("Player Hit, health" + playerManager.health);
+            }
+        }
+
+        private void OnCollisionStay(Collision other)
+        {
+            if (playerInReach)
+            {
+                attackDelayTimer += Time.deltaTime;
+                if (attackDelayTimer >= delayBetweenAttacks - howMuchEarlierStartAttackAnimation &&
+                    attackDelayTimer <= delayBetweenAttacks)
+                {
+                    enemyAnimator.SetTrigger("isAttacking");
+                }
+
+                if (attackDelayTimer >= delayBetweenAttacks)
+                {
+                    player.GetComponent<PlayerManager>().Hit(damage);
+                    attackDelayTimer = 0;
+                }
+            }
+        }
+
+        private void OnCollisionExit(Collision collision)
+        {
+            if (collision.gameObject == player)
+            {
+                playerInReach = false;
+                attackDelayTimer = 0;
             }
         }
 
         public void HitEnemy(float damage)
         {
+            healthBar.value -= damage;
             enemyHealth -= damage;
             if (enemyHealth <= 0)
             {
-                Destroy(gameObject);
+                enemyAnimator.SetTrigger("isDead");
+                Destroy(gameObject,10f);
+                Destroy(GetComponent<NavMeshAgent>());
+                Destroy(GetComponent<EnemyManager>());
+                Destroy(GetComponent<CapsuleCollider>());
                 gameManager.enemiesAlive--;
             }
         }

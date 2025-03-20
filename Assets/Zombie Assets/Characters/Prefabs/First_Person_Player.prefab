@@ -426,14 +426,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1984600518568582726}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.01, y: 0.115, z: -0.134}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.051763296, y: 0.389, z: -0.055999994}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1958288553080837768}
-  m_Father: {fileID: 2953027270972507750}
-  m_RootOrder: 0
+  m_Children: []
+  m_Father: {fileID: 1958288553080837768}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &1984600518568582728
 Camera:
@@ -776,7 +775,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1984600518568582731}
+  - {fileID: 1958288553080837768}
   - {fileID: 177776742643567970}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -847,6 +846,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 100
+  healthText: {fileID: 0}
+  playerCamera: {fileID: 0}
 --- !u!1 &3501827087418335523
 GameObject:
   m_ObjectHideFlags: 0
@@ -872,13 +873,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3501827087418335523}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.051763304, y: -0.389, z: 0.055999994}
+  m_LocalPosition: {x: 0.041763306, y: -0.274, z: -0.07800001}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3996270650742098117}
   - {fileID: 947360279084866032}
-  m_Father: {fileID: 1984600518568582731}
+  - {fileID: 1984600518568582731}
+  m_Father: {fileID: 2953027270972507750}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &7081564326287287875
@@ -1473,6 +1475,7 @@ MonoBehaviour:
   playerCam: {fileID: 1984600518568582726}
   range: 15
   weaponDamage: 25
+  playerAnimator: {fileID: 0}
 --- !u!4 &7406987462634693240 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4410051066877661230, guid: 6ffe500a9db1a1f4198b80b46bc35bc6,

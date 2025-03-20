@@ -5,8 +5,11 @@ using UnityEngine;
 
 public class MouseLook : MonoBehaviour
 {
+    public Transform playerBody;
     public float lookSpeed = 3;
-    private Vector2 rotation = Vector2.zero;
+    public float mouseSensibility = 100f;
+    
+    private float xRotation;
     
     private void Update()
     {
@@ -15,11 +18,19 @@ public class MouseLook : MonoBehaviour
     
     public void Look() 
     {
-        rotation.y += Input.GetAxis("Mouse X");
-        rotation.x += -Input.GetAxis("Mouse Y");
-        rotation.x = Mathf.Clamp(rotation.x, -15f, 15f);
-        transform.eulerAngles = new Vector2(0,rotation.y) * lookSpeed;
-        Camera.main.transform.localRotation = Quaternion.Euler(rotation.x * lookSpeed, 0, 0);
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensibility * lookSpeed* Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensibility * lookSpeed* Time.deltaTime;
+
+        // diferència entre xRotation i mouseY
+        xRotation -= mouseY;
+        // filtram per a que no passi del màxim i del mínim
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+        //Rotació eix horitzontal
+        playerBody.Rotate(Vector3.up * mouseX);
+        //Rotació eix vertial
+        transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
+
     }
 
     
