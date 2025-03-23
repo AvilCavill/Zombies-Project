@@ -1,50 +1,66 @@
-using System.Collections;
-using System.Collections.Generic;
 using EnemyAI;
 using UnityEngine;
 
-public class WeaponManager : MonoBehaviour
+namespace WeaponController
 {
-    public GameObject playerCam;
-    public float range;
-    public float weaponDamage = 25;
+    public class WeaponManager : MonoBehaviour
+    {
+        public GameObject playerCam;
+        public float range;
+        public float weaponDamage = 25;
     
-    //Animation Controller
-    public Animator playerAnimator;
-
-    // Start is called before the first frame update
-    void Start()
-    {
+        //Animation Controller
+        public Animator playerAnimator;
         
-    }
+        //Particules
+        public ParticleSystem flashParticleSystem;
+        public GameObject bloodParticleSystem;
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (playerAnimator.GetBool("isShooting"))
+        //Efectes so
+        public AudioClip shootClip;
+        public AudioSource weaponAudioSource;
+        
+        void Start()
         {
-            playerAnimator.SetBool("isShooting", false);
+         weaponAudioSource = GetComponent<AudioSource>();
         }
-        if (Input.GetMouseButtonDown(0))
-        {
-            Shoot();
-        }        
-    }
 
-    public void Shoot()
-    {
-        playerAnimator.SetBool("isShooting", true);
-        RaycastHit hit;
-        if (Physics.Raycast(playerCam.transform.position, transform.forward, out hit, range))
+        // Update is called once per frame
+        void Update()
         {
-            EnemyManager enemyManager = hit.transform.GetComponent<EnemyManager>();
-            Debug.Log("Fire");
-            if (enemyManager != null)
+            if (!GameManager.sharedInstance.isPaused && !GameManager.sharedInstance.isGameOver)
             {
-                Debug.Log("Enemic alcanzat");
-                enemyManager.HitEnemy(weaponDamage);
+                if (playerAnimator.GetBool("isShooting"))
+                {
+                    playerAnimator.SetBool("isShooting", false);
+                }
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Shoot();
+                }
             }
         }
+
+        public void Shoot()
+        {
+            flashParticleSystem.Play();
+            playerAnimator.SetBool("isShooting", true);
+            weaponAudioSource.PlayOneShot(shootClip, 0.75f);
+            RaycastHit hit;
+            if (Physics.Raycast(playerCam.transform.position, transform.forward, out hit, range))
+            {
+                EnemyManager enemyManager = hit.transform.GetComponent<EnemyManager>();
+                Debug.Log("Fire");
+                if (enemyManager != null)
+                {
+                    GameObject particleInstance = Instantiate(bloodParticleSystem, hit.point, Quaternion.LookRotation(hit.normal));
+                    particleInstance.transform.parent = hit.transform;
+                    Debug.Log("Enemic alcanzat");
+                    enemyManager.HitEnemy(weaponDamage);
+                }
+            }
         
+        }
     }
 }

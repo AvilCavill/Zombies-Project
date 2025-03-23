@@ -7,7 +7,9 @@ public class PlayerMovement : MonoBehaviour
 {
    //Variables jugador
    public CharacterController player;
-   public float speed = 12.0f;
+   public float speed;
+   public float walkSpeed = 5f;
+   public float runSpeed = 10f;
    
    //Variables de la gravetat
    private Vector3 velocity;
@@ -50,6 +52,15 @@ public class PlayerMovement : MonoBehaviour
       if (Input.GetButtonDown("Jump") && isGrounded)
       {
          velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+      }
+
+      if (Input.GetButton("Fire3") && isGrounded)
+      {
+         speed = runSpeed;
+      }
+      else
+      {
+         speed = walkSpeed;
       }
    }
 }

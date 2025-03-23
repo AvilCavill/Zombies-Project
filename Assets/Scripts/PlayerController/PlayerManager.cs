@@ -39,7 +39,7 @@ namespace PlayerController
             {
                 hitPanel.alpha -= Time.deltaTime;
             }
-            healthText.text = health.ToString();
+            healthText.text = health.ToString() + "HP";
             if (shakeTime < shakeDuration)
             {
                 shakeTime += Time.deltaTime;

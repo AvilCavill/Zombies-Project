@@ -3,6 +3,7 @@ using PlayerController;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace EnemyAI
 {
@@ -23,6 +24,9 @@ namespace EnemyAI
         public float attackDelayTimer;
         public float howMuchEarlierStartAttackAnimation;
         public float delayBetweenAttacks;
+
+        // public AudioSource enemyAudioSource;
+        // public AudioClip[] growlAudioClips;
         void Start()
         {
             gameManager = FindObjectOfType<GameManager>();
@@ -31,11 +35,18 @@ namespace EnemyAI
 
             healthBar.maxValue = enemyHealth;
             healthBar.value = enemyHealth;
+            // enemyAudioSource = GetComponent<AudioSource>();/
         }
 
         // Update is called once per frame
         void Update()
         {
+            // if (!enemyAudioSource.isPlaying)
+            // {
+            //     enemyAudioSource.clip = growlAudioClips[Random.Range(0, growlAudioClips.Length)];
+            //     enemyAudioSource.Play();
+            // }
+            
             GetComponent<NavMeshAgent>().SetDestination(player.transform.position);
             if (GetComponent<NavMeshAgent>().velocity.magnitude > 1)
             {

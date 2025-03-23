@@ -25,13 +25,38 @@ public class GameManager : MonoBehaviour
     public GameObject pausePanel;
     public GameObject gameOverPanel;
     public GameObject UIGamePanel;
+    public GameObject hitPanel;
 
     public PlayerManager playerManager;
+
+    public bool isPaused;
+    public bool isGameOver;
+
+    public static GameManager sharedInstance;
+
+    public void Awake()
+    {
+        if (sharedInstance == null)
+        {
+            sharedInstance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void Start()
     {
+        isPaused = false;
+        isGameOver = false;
+        Time.timeScale = 1f;
         pausePanel.SetActive(false);
         gameOverPanel.SetActive(false);
         roundText.text = round.ToString();
+        
+        spawnPoints = GameObject.FindGameObjectsWithTag("Spawners");
+        
     }
 
     private void Update()
@@ -87,8 +112,10 @@ public class GameManager : MonoBehaviour
     {
         pausePanel.SetActive(true);
         UIGamePanel.SetActive(false);
+        hitPanel.SetActive(false);
         Time.timeScale = 0;
         Cursor.lockState = CursorLockMode.None;
+        isPaused = true;
     }
 
     public void Resume()
@@ -97,6 +124,8 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1;
         Cursor.lockState = CursorLockMode.Locked;
         UIGamePanel.SetActive(true);
+        hitPanel.SetActive(true);
+        isPaused = false;
     }
 
     public void GameOver()
@@ -105,6 +134,8 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         gameOverPanel.SetActive(true);
         UIGamePanel.SetActive(false);
+        hitPanel.SetActive(false);
+        isGameOver = true;
     }
     
 
