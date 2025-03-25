@@ -1,4 +1,5 @@
 using EnemyAI;
+using Photon.Pun;
 using UnityEngine;
 
 namespace WeaponController
@@ -20,6 +21,10 @@ namespace WeaponController
         public AudioClip shootClip;
         public AudioSource weaponAudioSource;
         
+        public PhotonView photonView;
+
+        public GameManager gameManager;
+        
         void Start()
         {
          weaponAudioSource = GetComponent<AudioSource>();
@@ -28,7 +33,11 @@ namespace WeaponController
         // Update is called once per frame
         void Update()
         {
-            if (!GameManager.sharedInstance.isPaused && !GameManager.sharedInstance.isGameOver)
+            if (PhotonNetwork.InRoom && !photonView.IsMine)
+            {
+                return;
+            }
+            if (!gameManager.isPaused && !gameManager.isGameOver)
             {
                 if (playerAnimator.GetBool("isShooting"))
                 {
@@ -44,9 +53,15 @@ namespace WeaponController
 
         public void Shoot()
         {
-            flashParticleSystem.Play();
+            if (PhotonNetwork.InRoom)
+            {
+                photonView.RPC("WeaponShootSFX", RpcTarget.All, photonView.ViewID);
+            }
+            else
+            {
+                ShootVFX(photonView.ViewID);
+            }
             playerAnimator.SetBool("isShooting", true);
-            weaponAudioSource.PlayOneShot(shootClip, 0.75f);
             RaycastHit hit;
             if (Physics.Raycast(playerCam.transform.position, transform.forward, out hit, range))
             {
@@ -61,6 +76,15 @@ namespace WeaponController
                 }
             }
         
+        }
+
+        public void ShootVFX(int viewID)
+        {
+            if (photonView.ViewID == viewID)
+            {
+                flashParticleSystem.Play();
+                weaponAudioSource.PlayOneShot(shootClip, 0.75f);
+            }
         }
     }
 }

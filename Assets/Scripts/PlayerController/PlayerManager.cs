@@ -1,14 +1,17 @@
 using System;
+using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using WeaponController;
 using Random = UnityEngine.Random;
 
 namespace PlayerController
 {
     public class PlayerManager : MonoBehaviour
     {
+        
         public float health = 100f;
         public TMP_Text healthText;
         
@@ -21,11 +24,31 @@ namespace PlayerController
         //HitPanel
         public CanvasGroup hitPanel;
 
+        public PhotonView photonView;
+
+        public GameObject activeWeapon;
         public void Hit(float damage)
         {
-            shakeTime = 0;
-            health -= damage;
-            hitPanel.alpha = 1;
+            if (PhotonNetwork.InRoom)
+            {
+                photonView.RPC("PlayerTakeDama", RpcTarget.All, damage, photonView.ViewID);    
+            }
+            else
+            {
+                PlayerTakeDamage(damage, photonView.ViewID);
+            }
+            
+        }
+
+        [PunRPC]
+        public void PlayerTakeDamage(float damage, int viewID)
+        {
+            if (photonView.ViewID == viewID)
+            {
+                shakeTime = 0;
+                health -= damage;
+                hitPanel.alpha = 1;
+            }
         }
 
         public void CameraShake()
@@ -35,6 +58,11 @@ namespace PlayerController
         
         private void Update()
         {
+            if (PhotonNetwork.InRoom && !photonView.IsMine)
+            {
+                playerCamera.gameObject.SetActive(false);
+                return;
+            }
             if (hitPanel.alpha > 0)
             {
                 hitPanel.alpha -= Time.deltaTime;
@@ -48,6 +76,12 @@ namespace PlayerController
             {
                 playerCamera.transform.localRotation = playerCameraOriginalRotation;
             }
+        }
+
+        [PunRPC]
+        public void WeaponShootSFX(int viewID)
+        {
+            activeWeapon.GetComponent<WeaponManager>().ShootVFX(viewID);
         }
     }
 }

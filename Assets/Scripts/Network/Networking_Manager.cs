@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -12,9 +14,24 @@ namespace Network
         // Start is called before the first frame update
         void Start()
         {
+            if (PhotonNetwork.IsConnected)
+            {
+                StartCoroutine(DisconnectPlayer());
+            }
             Debug.Log("Connected to server");
             PhotonNetwork.ConnectUsingSettings();
         }
+
+        IEnumerator DisconnectPlayer()
+        {
+            PhotonNetwork.LeaveRoom();
+            PhotonNetwork.Disconnect();
+            while (PhotonNetwork.IsConnected)
+            {
+                yield return null;
+            }
+        }
+        
 
         // Update is called once per frame
         void Update()
@@ -63,6 +80,12 @@ namespace Network
         {
             Debug.Log("Carregar Escena del joc MP");
             PhotonNetwork.LoadLevel(2);
+        }
+
+        public void LoadMainMenu()
+        {
+            PhotonNetwork.Disconnect();
+            SceneManager.LoadScene(0);
         }
     }
 }

@@ -2,14 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using EnemyAI;
+using Photon.Pun;
+using Photon.Realtime;
 using PlayerController;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using Random = UnityEngine.Random;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviourPunCallbacks
 {
     public int enemiesAlive;
     public int round;
@@ -19,7 +22,6 @@ public class GameManager : MonoBehaviour
     public TMP_Text totalRoundsText;
 
     public GameObject[] spawnPoints;
-    public GameObject enemyPrefab;
     
     //Panells
     public GameObject pausePanel;
@@ -32,19 +34,7 @@ public class GameManager : MonoBehaviour
     public bool isPaused;
     public bool isGameOver;
 
-    public static GameManager sharedInstance;
-
-    public void Awake()
-    {
-        if (sharedInstance == null)
-        {
-            sharedInstance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+    public PhotonView photonView;
 
     private void Start()
     {
@@ -61,12 +51,24 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (enemiesAlive == 0)
+        if (!PhotonNetwork.InRoom || PhotonNetwork.IsMasterClient && photonView.IsMine)
         {
-            round++;
-            roundText.text = round.ToString();
-            totalRoundsText.text = "Rounds survived: " + round.ToString();
-            NextWave(round);
+            if (enemiesAlive == 0)
+            {
+                round++;
+                totalRoundsText.text = "Rounds survived: " + round.ToString();
+                NextWave(round);
+                if (PhotonNetwork.InRoom)
+                {
+                    Hashtable hash = new Hashtable();
+                    hash.Add("currentRound", round);
+                    PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
+                }
+                else
+                {
+                    DisplayNextRound(round);
+                }
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -80,14 +82,28 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void DisplayNextRound(int i)
+    {
+        roundText.text = round.ToString();
+    }
+
     public void NextWave(int round)
     {
         for (int i = 0; i < round; i++)
         {
             int randPos = Random.Range(0, spawnPoints.Length);
             GameObject spawnPoint = spawnPoints[randPos];
+            GameObject enemyInstance;
             
-            GameObject enemyInstance = Instantiate(enemyPrefab, spawnPoint.transform.position, Quaternion.identity);
+            if (PhotonNetwork.InRoom)
+            {
+                enemyInstance = PhotonNetwork.Instantiate("Zombie", spawnPoint.transform.position, Quaternion.identity);
+            }
+            else
+            {
+                enemyInstance = Instantiate(Resources.Load("Zombie"), spawnPoint.transform.position, Quaternion.identity) as GameObject;
+            }
+            
             enemyInstance.GetComponent<EnemyManager>().gameManager = GetComponent<GameManager>();
             enemiesAlive++;
 
@@ -98,30 +114,50 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
-        Time.timeScale = 1;
-        SceneManager.LoadScene(1);
+        if (!PhotonNetwork.InRoom)
+        {
+            Time.timeScale = 1;
+            SceneManager.LoadScene(2);
+        }
+        else
+        {
+            SceneManager.LoadScene(1);
+        }
     }
 
     public void BackToMainMenu()
     {
-        Time.timeScale = 1;
-        SceneManager.LoadScene(0);
+        if (PhotonNetwork.InRoom)
+        {
+            Time.timeScale = 1;
+            SceneManager.LoadScene(1);
+        }
+        else
+        {
+            SceneManager.LoadScene(1);
+        }
     }
 
     public void PauseGame()
     {
+        if (!PhotonNetwork.InRoom)
+        {
+            Time.timeScale = 0;
+        }
         pausePanel.SetActive(true);
         UIGamePanel.SetActive(false);
         hitPanel.SetActive(false);
-        Time.timeScale = 0;
         Cursor.lockState = CursorLockMode.None;
         isPaused = true;
     }
 
     public void Resume()
     {
+        if (!PhotonNetwork.InRoom)
+        {
+            Time.timeScale = 1;
+        }
         pausePanel.SetActive(false);
-        Time.timeScale = 1;
         Cursor.lockState = CursorLockMode.Locked;
         UIGamePanel.SetActive(true);
         hitPanel.SetActive(true);
@@ -130,12 +166,26 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        Time.timeScale = 0;
+        if (!PhotonNetwork.InRoom)
+        {
+            Time.timeScale = 0;
+        }
         Cursor.lockState = CursorLockMode.None;
         gameOverPanel.SetActive(true);
         UIGamePanel.SetActive(false);
         hitPanel.SetActive(false);
         isGameOver = true;
+    }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    {
+        if (photonView.IsMine)
+        {
+            if (changedProps["currentRound"] != null)
+            {
+                DisplayNextRound((int) changedProps["currentRound"]);
+            }
+        }
     }
     
 

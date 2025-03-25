@@ -1,4 +1,5 @@
 using System;
+using Photon.Pun;
 using PlayerController;
 using UnityEngine;
 using UnityEngine.AI;
@@ -27,11 +28,16 @@ namespace EnemyAI
 
         // public AudioSource enemyAudioSource;
         // public AudioClip[] growlAudioClips;
+
+        private GameObject[] playersInScene;
+        
+        public PhotonView photonView;
+        
         void Start()
         {
             gameManager = FindObjectOfType<GameManager>();
+            playersInScene = GameObject.FindGameObjectsWithTag("Player");
             player = GameObject.FindGameObjectWithTag("Player");
-            playerManager = player.GetComponent<PlayerManager>();
 
             healthBar.maxValue = enemyHealth;
             healthBar.value = enemyHealth;
@@ -46,8 +52,20 @@ namespace EnemyAI
             //     enemyAudioSource.clip = growlAudioClips[Random.Range(0, growlAudioClips.Length)];
             //     enemyAudioSource.Play();
             // }
+
+            if (PhotonNetwork.InRoom && !PhotonNetwork.IsMasterClient)
+            {
+                return;
+            }
             
-            GetComponent<NavMeshAgent>().SetDestination(player.transform.position);
+            GetClosestPlayer();
+            if (player != null)
+            {
+                GetComponent<NavMeshAgent>().SetDestination(player.transform.position);
+            
+                healthBar.transform.LookAt(player.transform);
+            }
+            
             if (GetComponent<NavMeshAgent>().velocity.magnitude > 1)
             {
                 enemyAnimator.SetBool("isRunning", false);
@@ -63,7 +81,6 @@ namespace EnemyAI
             if (other.gameObject.CompareTag("Player"))
             {
                 playerInReach = true;
-                Debug.Log("Player Hit, health" + playerManager.health);
             }
         }
 
@@ -97,16 +114,48 @@ namespace EnemyAI
 
         public void HitEnemy(float damage)
         {
-            healthBar.value -= damage;
-            enemyHealth -= damage;
-            if (enemyHealth <= 0)
+            photonView.RPC("TakeDamage", RpcTarget.All, damage, photonView.ViewID);
+        }
+
+        [PunRPC]
+        public void TakeDamage(float damage, int viewID)
+        {
+            if(photonView.ViewID == viewID)
             {
-                enemyAnimator.SetTrigger("isDead");
-                Destroy(gameObject,10f);
-                Destroy(GetComponent<NavMeshAgent>());
-                Destroy(GetComponent<EnemyManager>());
-                Destroy(GetComponent<CapsuleCollider>());
-                gameManager.enemiesAlive--;
+                healthBar.value -= damage;
+                enemyHealth -= damage;
+                if (enemyHealth <= 0)
+                {
+                    enemyAnimator.SetTrigger("isDead");
+                    Destroy(gameObject,10f);
+                    Destroy(GetComponent<NavMeshAgent>());
+                    Destroy(GetComponent<EnemyManager>());
+                    Destroy(GetComponent<CapsuleCollider>());
+
+                    if (!PhotonNetwork.InRoom || !PhotonNetwork.IsMasterClient && photonView.IsMine)
+                    {
+                        gameManager.enemiesAlive--;    
+                    }
+                }
+            }
+        }
+
+        private void GetClosestPlayer()
+        {
+            float minddistance = Mathf.Infinity;
+            Vector3 currentPosition = transform.position;
+
+            foreach (GameObject p in playersInScene)
+            {
+                if (p != null)
+                {
+                    float distance = Vector3.Distance(p.transform.position, currentPosition);
+                    if (distance < minddistance)
+                    {
+                        minddistance = distance;
+                    }
+                }
+                
             }
         }
         
