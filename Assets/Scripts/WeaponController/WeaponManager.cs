@@ -1,10 +1,12 @@
 using EnemyAI;
+using ExitGames.Client.Photon;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 
 namespace WeaponController
 {
-    public class WeaponManager : MonoBehaviour
+    public class WeaponManager : MonoBehaviour, IOnEventCallback
     {
         public GameObject playerCam;
         public float range;
@@ -24,6 +26,8 @@ namespace WeaponController
         public PhotonView photonView;
 
         public GameManager gameManager;
+
+        private const byte VFX_EVENT = 0;
         
         void Start()
         {
@@ -55,7 +59,13 @@ namespace WeaponController
         {
             if (PhotonNetwork.InRoom)
             {
-                photonView.RPC("WeaponShootSFX", RpcTarget.All, photonView.ViewID);
+                int viewID = photonView.ViewID;
+                
+                RaiseEventOptions raiseOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+                SendOptions sendOptions = new SendOptions { Reliability = true };
+                
+                PhotonNetwork.RaiseEvent(VFX_EVENT, viewID, raiseOptions, sendOptions);
+                //photonView.RPC("WeaponShootSFX", RpcTarget.All, photonView.ViewID);
             }
             else
             {
@@ -77,7 +87,7 @@ namespace WeaponController
             }
         
         }
-
+        
         public void ShootVFX(int viewID)
         {
             if (photonView.ViewID == viewID)
@@ -86,5 +96,26 @@ namespace WeaponController
                 weaponAudioSource.PlayOneShot(shootClip, 0.75f);
             }
         }
+
+        void IOnEventCallback.OnEvent(EventData photonEvent)
+        {
+            if (photonEvent.Code == VFX_EVENT)
+            {
+                Debug.Log("EventReceived");
+                int viewID = (int)photonEvent.CustomData;
+                ShootVFX(viewID);
+            }
+        }
+
+        private void OnEnable()
+        {
+            PhotonNetwork.AddCallbackTarget(this);
+        }
+
+        private void OnDisable()
+        {
+            PhotonNetwork.RemoveCallbackTarget(this);
+        }
+        
     }
 }
