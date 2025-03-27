@@ -114,7 +114,14 @@ namespace EnemyAI
 
         public void HitEnemy(float damage)
         {
-            photonView.RPC("TakeDamage", RpcTarget.All, damage, photonView.ViewID);
+            if (PhotonNetwork.InRoom)
+            {
+                photonView.RPC("TakeDamage", RpcTarget.All, damage, photonView.ViewID);
+            }
+            else
+            {
+                TakeDamage(damage, photonView.ViewID);
+            }
         }
 
         [PunRPC]
@@ -132,7 +139,7 @@ namespace EnemyAI
                     Destroy(GetComponent<EnemyManager>());
                     Destroy(GetComponent<CapsuleCollider>());
 
-                    if (!PhotonNetwork.InRoom || !PhotonNetwork.IsMasterClient && photonView.IsMine)
+                    if (!PhotonNetwork.InRoom || (PhotonNetwork.IsMasterClient && photonView.IsMine))
                     {
                         gameManager.enemiesAlive--;    
                     }
@@ -152,6 +159,7 @@ namespace EnemyAI
                     float distance = Vector3.Distance(p.transform.position, currentPosition);
                     if (distance < minddistance)
                     {
+                        player = p;
                         minddistance = distance;
                     }
                 }

@@ -15,6 +15,8 @@ namespace PlayerController
         public float health = 100f;
         public TMP_Text healthText;
         
+        public GameManager gameManager;
+        
         //Shake camera variables
         public GameObject playerCamera;
         private float shakeTime = 1f;
@@ -31,7 +33,7 @@ namespace PlayerController
         {
             if (PhotonNetwork.InRoom)
             {
-                photonView.RPC("PlayerTakeDama", RpcTarget.All, damage, photonView.ViewID);    
+                photonView.RPC("PlayerTakeDamage", RpcTarget.All, damage, photonView.ViewID);    
             }
             else
             {
@@ -45,9 +47,19 @@ namespace PlayerController
         {
             if (photonView.ViewID == viewID)
             {
-                shakeTime = 0;
                 health -= damage;
-                hitPanel.alpha = 1;
+                healthText.text = $"{health} HP";
+                if (health <= 0)
+                {
+                    //SceneManager.LoadScene(0);
+                    gameManager.GameOver();
+                }
+                else
+                {
+                    shakeTime = 0;
+                    hitPanel.alpha = 1;
+                }
+
             }
         }
 

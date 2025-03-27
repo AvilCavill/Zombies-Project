@@ -51,10 +51,12 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        if (!PhotonNetwork.InRoom || PhotonNetwork.IsMasterClient && photonView.IsMine)
+        if (!PhotonNetwork.InRoom || (PhotonNetwork.IsMasterClient && photonView.IsMine))
         {
+            ;
             if (enemiesAlive == 0)
             {
+                Debug.Log("Canvi de ronda" + PhotonNetwork.InRoom);
                 round++;
                 totalRoundsText.text = "Rounds survived: " + round.ToString();
                 NextWave(round);
@@ -106,9 +108,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             
             enemyInstance.GetComponent<EnemyManager>().gameManager = GetComponent<GameManager>();
             enemiesAlive++;
-
-
-
         }
     }
 
@@ -116,12 +115,13 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.InRoom)
         {
+            // Tornam a temps a la normalitat si no estam online
             Time.timeScale = 1;
-            SceneManager.LoadScene(2);
+            SceneManager.LoadScene(3);
         }
         else
         {
-            SceneManager.LoadScene(1);
+            PhotonNetwork.LoadLevel(2);
         }
     }
 
@@ -134,7 +134,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene(0);
         }
     }
 
@@ -148,6 +148,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         UIGamePanel.SetActive(false);
         hitPanel.SetActive(false);
         Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         isPaused = true;
     }
 
@@ -171,6 +172,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             Time.timeScale = 0;
         }
         Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         gameOverPanel.SetActive(true);
         UIGamePanel.SetActive(false);
         hitPanel.SetActive(false);
