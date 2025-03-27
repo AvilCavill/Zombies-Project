@@ -486,7 +486,7 @@ MonoBehaviour:
   playerBody: {fileID: 6546416536768737836}
   lookSpeed: 3
   mouseSensibility: 200
-  photonView: {fileID: 8224357489232868431}
+  photonView: {fileID: -2696904775610075896}
 --- !u!114 &224999369589532421
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -826,7 +826,7 @@ GameObject:
   - component: {fileID: 4419125520663343072}
   - component: {fileID: 8224357489414440536}
   - component: {fileID: 8224357489566486840}
-  - component: {fileID: 8224357489232868431}
+  - component: {fileID: -2696904775610075896}
   - component: {fileID: 59630247407575572}
   m_Layer: 6
   m_Name: First_Person_Player
@@ -878,7 +878,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   jumpHeight: 2
-  photonView: {fileID: 8224357489232868431}
+  photonView: {fileID: -2696904775610075896}
 --- !u!143 &4419125520663343072
 CharacterController:
   m_ObjectHideFlags: 0
@@ -915,7 +915,7 @@ MonoBehaviour:
   playerCamera: {fileID: 7613473880230488588}
   shakeDuration: 0.5
   hitPanel: {fileID: 7613473879731136659}
-  photonView: {fileID: 8224357489232868431}
+  photonView: {fileID: -2696904775610075896}
   activeWeapon: {fileID: 3445881827482517219}
 --- !u!135 &8224357489566486840
 SphereCollider:
@@ -930,7 +930,7 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 1.5
   m_Center: {x: 0, y: 0.4, z: 0}
---- !u!114 &8224357489232868431
+--- !u!114 &-2696904775610075896
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3292,7 +3292,7 @@ MonoBehaviour:
   playerManager: {fileID: 8224357489414440536}
   isPaused: 0
   isGameOver: 0
-  photonView: {fileID: 8224357489232868431}
+  photonView: {fileID: -2696904775610075896}
 --- !u!1 &7613473880230488588
 GameObject:
   m_ObjectHideFlags: 0
@@ -8826,5 +8826,5 @@ MonoBehaviour:
     type: 3}
   shootClip: {fileID: 8300000, guid: 42dc462760399f045a6950b4c7474e7a, type: 3}
   weaponAudioSource: {fileID: 7613473879971741644}
-  photonView: {fileID: 8224357489232868431}
+  photonView: {fileID: -2696904775610075896}
   gameManager: {fileID: 7613473879964026503}

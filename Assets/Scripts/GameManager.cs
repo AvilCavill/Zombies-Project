@@ -71,22 +71,16 @@ public class GameManager : MonoBehaviourPunCallbacks
                     DisplayNextRound(round);
                 }
             }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            PauseGame();          
-        }
-
-        if (playerManager.health <= 0)
-        {
-            GameOver();
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                PauseGame();          
+            }
         }
     }
 
     private void DisplayNextRound(int i)
     {
-        roundText.text = round.ToString();
+        roundText.text = i.ToString();
     }
 
     public void NextWave(int round)
@@ -129,11 +123,11 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.InRoom)
         {
-            Time.timeScale = 1;
             SceneManager.LoadScene(1);
         }
         else
         {
+            Time.timeScale = 1;
             SceneManager.LoadScene(0);
         }
     }

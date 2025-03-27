@@ -149,6 +149,7 @@ namespace EnemyAI
 
         private void GetClosestPlayer()
         {
+            playersInScene = GameObject.FindGameObjectsWithTag("Player");
             float minddistance = Mathf.Infinity;
             Vector3 currentPosition = transform.position;
 
