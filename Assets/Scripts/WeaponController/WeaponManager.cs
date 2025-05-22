@@ -2,6 +2,7 @@ using EnemyAI;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
+using StateMachine;
 using UnityEngine;
 
 namespace WeaponController
@@ -75,15 +76,36 @@ namespace WeaponController
             RaycastHit hit;
             if (Physics.Raycast(playerCam.transform.position, transform.forward, out hit, range))
             {
-                EnemyManager enemyManager = hit.transform.GetComponent<EnemyManager>();
-                Debug.Log("Fire");
-                if (enemyManager != null)
+                Transform hitTransform = hit.transform;
+                if (hitTransform.name == "Head")
                 {
-                    GameObject particleInstance = Instantiate(bloodParticleSystem, hit.point, Quaternion.LookRotation(hit.normal));
-                    particleInstance.transform.parent = hit.transform;
-                    Debug.Log("Enemic alcanzat");
-                    enemyManager.HitEnemy(weaponDamage);
+                    Debug.Log("Headshot");
+                    IA_StateMachine enemy = hitTransform.GetComponentInParent<IA_StateMachine>();
+                    if (enemy != null)
+                    {
+                        Instantiate(bloodParticleSystem, hit.point, Quaternion.LookRotation(hit.normal));
+                        enemy.HitHeadshot(weaponDamage * 2f); // o más daño por headshot
+                    }
                 }
+                else
+                {
+                    IA_StateMachine enemy = hitTransform.GetComponentInParent<IA_StateMachine>();
+                    if (enemy != null)
+                    {
+                        Instantiate(bloodParticleSystem, hit.point, Quaternion.LookRotation(hit.normal));
+                        enemy.HitEnemy(weaponDamage); // daño normal
+                    }
+                }
+
+                // EnemyManager enemyManager = hit.transform.GetComponent<EnemyManager>();
+                // Debug.Log("Fire");
+                // if (enemyManager != null)
+                // {
+                //     GameObject particleInstance = Instantiate(bloodParticleSystem, hit.point, Quaternion.LookRotation(hit.normal));
+                //     particleInstance.transform.parent = hit.transform;
+                //     Debug.Log("Enemic alcanzat");
+                //     enemyManager.HitEnemy(weaponDamage);
+                // }
             }
         
         }

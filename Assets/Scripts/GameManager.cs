@@ -5,6 +5,7 @@ using EnemyAI;
 using Photon.Pun;
 using Photon.Realtime;
 using PlayerController;
+using StateMachine;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -97,10 +98,11 @@ public class GameManager : MonoBehaviourPunCallbacks
             }
             else
             {
-                enemyInstance = Instantiate(Resources.Load("Zombie"), spawnPoint.transform.position, Quaternion.identity) as GameObject;
+                enemyInstance = Instantiate(Resources.Load("Zombie_IA"), spawnPoint.transform.position, Quaternion.identity) as GameObject;
             }
             
-            enemyInstance.GetComponent<EnemyManager>().gameManager = GetComponent<GameManager>();
+            enemyInstance.GetComponent<IA_StateMachine>().gameManager = GetComponent<GameManager>();
+            //enemyInstance.GetComponent<EnemyManager>().gameManager = GetComponent<GameManager>();
             enemiesAlive++;
         }
     }

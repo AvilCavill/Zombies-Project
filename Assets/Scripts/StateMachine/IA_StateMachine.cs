@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using EnemyAI;
 using PlayerController;
 using Unity.VisualScripting;
@@ -45,9 +46,14 @@ namespace StateMachine
         public float confusedTimer;
         public float confusedDuration = 3.0f;
         
+        private bool isDead = false;
+        [Range(0f, 1f)]public float fakeDeathChance = 0.3f;
+        private NavMeshAgent agent;
+        
         
         void Start()
         {
+            agent = GetComponent<NavMeshAgent>();
             gameManager = FindObjectOfType<GameManager>();
             player = GameObject.FindGameObjectWithTag("Player");
 
@@ -61,18 +67,20 @@ namespace StateMachine
         // Update is called once per frame
         void Update()
         {
+            if (isDead) return;
             // if (!enemyAudioSource.isPlaying)
             // {
             //     enemyAudioSource.clip = growlAudioClips[Random.Range(0, growlAudioClips.Length)];
             //     enemyAudioSource.Play();
             // }
             
-            if (player != null)
+            NavMeshAgent agent = GetComponent<NavMeshAgent>();
+            if (player != null && agent.enabled && agent.isOnNavMesh && currentState != State.Fake_Dead && currentState != State.Dead)
             {
-                GetComponent<NavMeshAgent>().SetDestination(player.transform.position);
-            
+                agent.SetDestination(player.transform.position);
                 healthBar.transform.LookAt(player.transform);
             }
+
 
             switch (currentState)
             {
@@ -104,11 +112,18 @@ namespace StateMachine
         
         private void IdleBehaviour()
         {
-            GetComponent<NavMeshAgent>().SetDestination(transform.position); // Quieto
+            GetComponent<NavMeshAgent>().SetDestination(transform.position); //Se queda quieto
+            
+            float distance = Vector3.Distance(transform.position, player.transform.position);
+            if (distance < 15f)  
+            {
+                currentState = State.Chase;
+            }
         }
 
         private void ChaseBehaviour()
         {
+            float distance = Vector3.Distance(transform.position, player.transform.position);
             GetComponent<NavMeshAgent>().SetDestination(player.transform.position);
         }
 
@@ -150,9 +165,10 @@ namespace StateMachine
             enemyAnimator.SetBool("isConfused", true);
         }
 
-        private void HitHeadshot(float damage)
+        public void HitHeadshot(float damage)
         {
             TakeDamage(damage);
+            EnterConfusedState();
             
         }
 
@@ -197,6 +213,38 @@ namespace StateMachine
             TakeDamage(damage);
         }
 
+        
+        private IEnumerator PerformFakeDeath()
+        {
+            isDead = false;
+            enemyAnimator.SetTrigger("isDead");
+            currentState = State.Dead;
+
+            agent.enabled = false;
+            GetComponent<CapsuleCollider>().enabled = false;
+
+            yield return new WaitForSeconds(1.5f); // tiempo de "muerto"
+
+            currentState = State.Fake_Dead;
+            enemyAnimator.SetTrigger("fakeDeath"); // animación de levantarse
+
+            // Esperar a que la animación termine
+            yield return new WaitUntil(() =>
+                enemyAnimator.GetCurrentAnimatorStateInfo(0).IsName("zombie_fakeDeath") &&
+                enemyAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f
+            );
+
+            // Revivir completamente
+            enemyHealth = 40f;
+            healthBar.maxValue = enemyHealth;
+            healthBar.value = enemyHealth;
+
+            GetComponent<CapsuleCollider>().enabled = true;
+            agent.enabled = true;
+
+            currentState = State.Chase;
+        }
+
      
         public void TakeDamage(float damage)
         {
@@ -204,13 +252,18 @@ namespace StateMachine
             enemyHealth -= damage;
             if (enemyHealth <= 0)
             {
-                enemyAnimator.SetTrigger("isDead");
-                Destroy(gameObject,10f);
-                Destroy(GetComponent<NavMeshAgent>());
-                Destroy(GetComponent<EnemyManager>());
-                Destroy(GetComponent<CapsuleCollider>());
-                gameManager.enemiesAlive--;    
-            }
+                if (UnityEngine.Random.value <= fakeDeathChance)
+                {
+                    StartCoroutine(PerformFakeDeath());
+                    return;
+                }
+            isDead = true;
+            enemyAnimator.SetTrigger("isDead");
+            GetComponent<NavMeshAgent>().enabled = false;
+            GetComponent<CapsuleCollider>().enabled = false;
+            gameManager.enemiesAlive--;
+            Destroy(gameObject, 10f);
+        }   
         }
     }
 }
