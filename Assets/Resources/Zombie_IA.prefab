@@ -746,7 +746,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 705015191057950382}
-  - component: {fileID: 7544459490567584518}
   m_Layer: 0
   m_Name: Root
   m_TagString: Untagged
@@ -772,26 +771,6 @@ Transform:
   m_Father: {fileID: 8014705920907384724}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &7544459490567584518
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2500271326998654825}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 07c8e529d346b5445a5cda3e7942c14d, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
 --- !u!1 &2509522280564225325
 GameObject:
   m_ObjectHideFlags: 0
@@ -1775,6 +1754,7 @@ GameObject:
   - component: {fileID: 3664479800878109889}
   - component: {fileID: 4319526322233328833}
   - component: {fileID: 2353821467230460410}
+  - component: {fileID: 6417956057508222393}
   m_Layer: 0
   m_Name: Zombie_IA
   m_TagString: Untagged
@@ -1961,7 +1941,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  enemyAnimator: {fileID: 7544459490567584518}
+  enemyAnimator: {fileID: 0}
   enemyHealth: 100
   damage: 20
   gameManager: {fileID: 0}
@@ -1973,6 +1953,26 @@ MonoBehaviour:
   confusedTimer: 0
   confusedDuration: 3
   fakeDeathChance: 0.3
+--- !u!95 &6417956057508222393
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7237887403474013486}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 07c8e529d346b5445a5cda3e7942c14d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
 --- !u!1 &7599627658468118477
 GameObject:
   m_ObjectHideFlags: 0
