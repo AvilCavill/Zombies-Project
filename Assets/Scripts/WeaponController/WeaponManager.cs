@@ -77,7 +77,7 @@ namespace WeaponController
             if (Physics.Raycast(playerCam.transform.position, transform.forward, out hit, range))
             {
                 Transform hitTransform = hit.transform;
-                if (hitTransform.name == "Head")
+                if (hit.collider.CompareTag("Head") || hit.collider.gameObject.name == "Head")
                 {
                     Debug.Log("Headshot");
                     IA_StateMachine enemy = hitTransform.GetComponentInParent<IA_StateMachine>();
