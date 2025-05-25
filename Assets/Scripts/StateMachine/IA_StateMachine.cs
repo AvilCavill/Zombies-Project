@@ -52,6 +52,13 @@ namespace StateMachine
         [Range(0f, 1f)]public float fakeDeathChance = 0.3f;
         private NavMeshAgent agent;
         
+        //Eat corpse variables
+        public float minHealthEat = 40f;
+        public float healthRecoverEat = 30f;
+        public float eatDuration = 5f;
+        private GameObject targetCorpse;
+        private bool isEating;
+         
         
         void Start()
         {
@@ -84,6 +91,19 @@ namespace StateMachine
             {
                 agent.SetDestination(player.transform.position);
                 healthBar.transform.LookAt(player.transform);
+            }
+            
+            if (enemyHealth <= minHealthEat &&
+                currentState != State.Eat_Corpse &&
+                currentState != State.Dead &&
+                currentState != State.Fake_Dead &&
+                !isEating)
+            {
+                FindNearestCorpse();
+                if (targetCorpse != null)
+                {
+                    currentState = State.Eat_Corpse;
+                }
             }
 
 
@@ -134,17 +154,17 @@ namespace StateMachine
 
         private void AttackBehaviour()
         {
-            // Ya manejado por OnCollisionStay, pero podrías animar al enemigo aquí
+            
         }
 
         private void DeadBehaviour()
         {
-            // Ya está en TakeDamage
+            
         }
 
         private void FakeDeadBehaviour()
         {
-            // Ahora revivimos al zombie
+            // Resurrecio zombie
             enemyHealth = 40f;
             healthBar.value = enemyHealth;
             
@@ -157,9 +177,26 @@ namespace StateMachine
             currentState = State.Chase;
         }
 
+        
         private void EatCorpseBehaviour()
         {
-            // Ir hacia el cadáver y reproducir animación de comer
+            if (targetCorpse == null)
+            {
+                currentState = State.Idle;
+                return;
+            }
+
+            float distanceToCorpse = Vector3.Distance(transform.position, targetCorpse.transform.position);
+
+            if (distanceToCorpse > 0.5f && !isEating)
+            {
+                agent.SetDestination(targetCorpse.transform.position);
+                enemyAnimator.SetBool("isRunning", true);
+            }
+            else if (!isEating)
+            {
+                StartCoroutine(EatCorpseCoroutine());
+            }
         }
 
         private void ConfusedBehaviour()
@@ -193,6 +230,49 @@ namespace StateMachine
             }
         }
 
+        private void FindNearestCorpse()
+        {
+            GameObject [] corpses = GameObject.FindGameObjectsWithTag("Corpse");
+            float minDistance = Mathf.Infinity;
+            GameObject nearestCorpse = null;
+
+            foreach (var corpse in corpses)
+            {
+                float distance = Vector3.Distance(transform.position, corpse.transform.position);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    nearestCorpse = corpse;
+                }
+            }
+            targetCorpse = nearestCorpse;
+        }
+
+        private IEnumerator EatCorpseCoroutine()
+        {
+            isEating = true;
+            agent.isStopped = true;
+            
+            enemyAnimator.SetBool("isRunning", false);
+            enemyAnimator.SetBool("isEatingCorpse", true);
+            
+            
+            yield return new WaitForSeconds(eatDuration);
+
+            enemyAnimator.SetBool("isEatingCorpse", false);
+            
+            enemyHealth += healthRecoverEat;
+            enemyHealth = Mathf.Min(enemyHealth, 100);
+            healthBar.value = enemyHealth;
+            
+            
+            
+                agent.isStopped = false;
+                isEating = false;
+            
+            currentState = State.Idle;
+        }
+        
         public void HitHeadshot(float damage)
         {
                 TakeDamage(damage);

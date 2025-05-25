@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Spawners
+  - Head
+  - Bullet
+  - Corpse
   layers:
   - Default
   - TransparentFX
